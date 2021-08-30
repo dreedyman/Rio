@@ -19,7 +19,13 @@ repositories {
     jcenter()
 }
 
-project.apply plugin: 'com.jfrog.bintray'
+/*plugins {
+    id("maven-publish")
+}*/
+
+//project.apply plugin: "maven-publish"
+
+//project.apply plugin: 'com.jfrog.bintray'
 
 if (project.name != "distribution" && project.name != "rio-int-tests" && !project.path.contains("example")) {
     task sourcesJar(type: Jar, dependsOn: classes) {
@@ -38,7 +44,17 @@ if (project.name != "distribution" && project.name != "rio-int-tests" && !projec
         archives javadocJar
     }
 
+
     publishing {
+        repositories {
+            maven {
+                url = uri("https://repo.repsy.io/mvn/dreedy/maven")
+                credentials {
+                    username = project.findProperty("repsy.user") ?: System.getenv("USERNAME")
+                    password = project.findProperty("repsy.key") ?: System.getenv("TOKEN")
+                }
+            }
+        }
         publications {
             mavenJava(MavenPublication) {
                 from components.java
@@ -67,24 +83,3 @@ if (project.name != "distribution" && project.name != "rio-int-tests" && !projec
     }
 }
 
-if (project.hasProperty('bintray.user')) {
-    bintray {
-        //dryRun = true
-        override = true
-        user = project.property('bintray.user')
-        key = project.property('bintray.key')
-        publications = project.name == "distribution" ? ['distribution'] : ['mavenJava']
-
-        pkg {
-            repo = 'maven'
-            name = project.archivesBaseName
-            licenses = ['Apache-2.0']
-            publish = true
-            desc = project.description
-            vcsUrl = 'https://github.com/dreedyman/Rio'
-            version {
-                name = project.version
-            }
-        }
-    }
-}
