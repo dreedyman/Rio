@@ -42,7 +42,7 @@ public class SecureEnv {
     public static void setup(String... keystorePaths) throws Exception {
         List<KeyStore> keyStores = new ArrayList<>();
         for (String keyStorePath : keystorePaths) {
-            LOGGER.info("Loading {}", keyStorePath);
+            LOGGER.debug("Loading {}", keyStorePath);
             File keyStoreFile = new File(keyStorePath);
             keyStores.add(KeyStoreHelper.load(keyStoreFile));
         }
