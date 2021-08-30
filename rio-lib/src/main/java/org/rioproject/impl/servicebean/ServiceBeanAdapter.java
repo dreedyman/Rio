@@ -240,6 +240,7 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
             } else {
                 String message = String.format("ServiceBean %s instantiation failed",
                                                ServiceLogUtil.logName(context.getServiceElement()));
+                                               ServiceLogUtil.logName(context.getServiceElement());
                 throw new ServiceBeanInstantiationException(message, t, true);
             }
         }
@@ -370,8 +371,10 @@ public abstract class ServiceBeanAdapter extends ServiceProvider implements
          */
         EventDescriptor slaEventDesc = SLAThresholdEvent.getEventDescriptor();
         slaEventHandler = new DispatchEventHandler(slaEventDesc, config);
-        getEventTable().put(slaEventDesc.eventID, slaEventHandler);
-        addAttribute(slaEventDesc);
+        if (getEventTable() != null) {
+            getEventTable().put(slaEventDesc.eventID, slaEventHandler);
+            addAttribute(slaEventDesc);
+        }
 
         /*ServiceLogEventHandler appender = ServiceLogEventHandlerHelper.findInstance();
         if(appender!=null) {
