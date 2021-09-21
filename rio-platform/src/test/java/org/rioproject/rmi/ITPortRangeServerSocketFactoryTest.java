@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.net;
+package org.rioproject.rmi;
 
 import java.net.UnknownHostException;
 import net.jini.jeri.*;
@@ -21,6 +21,7 @@ import net.jini.jeri.tcp.TcpEndpoint;
 import net.jini.jeri.tcp.TcpServerEndpoint;
 import org.junit.Assert;
 import org.junit.Test;
+import org.rioproject.net.PortRangeServerSocketFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -79,10 +80,10 @@ public class ITPortRangeServerSocketFactoryTest {
             t = e;
         }
         Assert.assertNull(t);
-        Assert.assertTrue(pr1.equals(pr2));
-        Assert.assertTrue(pr2.equals(pr1));
-        Assert.assertTrue(pr1.equals(pr1));
-        Assert.assertTrue(pr2.equals(pr2));
+        Assert.assertEquals(pr1, pr2);
+        Assert.assertEquals(pr2, pr1);
+        Assert.assertEquals(pr1, pr1);
+        Assert.assertEquals(pr2, pr2);
     }
 
     @Test
@@ -110,7 +111,7 @@ public class ITPortRangeServerSocketFactoryTest {
     @Test
     public void verifyServerSocketsWithinRange() {
         PortRangeServerSocketFactory range = new PortRangeServerSocketFactory(49152, 49155);
-        List<ServerSocket> serverSockets = new ArrayList<ServerSocket>();
+        List<ServerSocket> serverSockets = new ArrayList<>();
         Throwable t = null;
         while(t==null) {
             try {
@@ -132,10 +133,10 @@ public class ITPortRangeServerSocketFactoryTest {
     @Test
     public void createPortRangeWithStartRangeOnly() {
         PortRangeServerSocketFactory range = new PortRangeServerSocketFactory(65530);
-        Assert.assertTrue(range.getEnd()==PortRangeServerSocketFactory.RANGE_END);
-        List<ServerSocket> serverSockets = new ArrayList<ServerSocket>();
+        Assert.assertEquals(range.getEnd(), PortRangeServerSocketFactory.RANGE_END);
+        List<ServerSocket> serverSockets = new ArrayList<>();
         Throwable t = null;
-        while(t==null) {
+        while (t == null) {
             try {
                 ServerSocket s = range.createServerSocket(0);
                 serverSockets.add(s);
@@ -144,7 +145,7 @@ public class ITPortRangeServerSocketFactoryTest {
             }
         }
         Assert.assertNotNull(t);
-        Assert.assertTrue("Should have 6 ServerSockets", serverSockets.size()==6);
+        Assert.assertEquals("Should have 6 ServerSockets", 6, serverSockets.size());
         for (ServerSocket s : serverSockets) {
             int port = s.getLocalPort();
             Assert.assertTrue("Port "+port+" should be >= "+range.getStart(), port >= range.getStart());
@@ -156,8 +157,8 @@ public class ITPortRangeServerSocketFactoryTest {
     public void createBasicJeriExporter() throws UnknownHostException {
         Throwable t = null;
         PortRangeServerSocketFactory range = null;
-        List<Endpoint> endPoints = new ArrayList<Endpoint>();
-        String host = getHostAddressFromProperty("java.rmi.server.hostname");
+        List<Endpoint> endPoints = new ArrayList<>();
+        String host = getHostAddressFromProperty();
         for(int i=0; i<500; i++) {
             try {
                 range = new PortRangeServerSocketFactory(10000, 10500);
@@ -176,7 +177,7 @@ public class ITPortRangeServerSocketFactoryTest {
         }
         Assert.assertNull(t);
         Assert.assertNotNull(range);
-        Assert.assertTrue(endPoints.size()==500);
+        Assert.assertEquals(500, endPoints.size());
         for(Endpoint e : endPoints) {
             Assert.assertTrue(e instanceof TcpEndpoint);
             int port = ((TcpEndpoint)e).getPort();
@@ -195,24 +196,22 @@ public class ITPortRangeServerSocketFactoryTest {
      * property is not resolvable, return the default host address obtained from
      * {@link java.net.InetAddress#getLocalHost()}
      *
-     * @param property The property name to use
-     *
      * @return The local host address
      *
      * @throws java.net.UnknownHostException if no IP address for the host name
      * could be found.
      */
-	String getHostAddressFromProperty(String property) throws java.net.UnknownHostException {
+	String getHostAddressFromProperty() throws java.net.UnknownHostException {
         String host = getHostAddress();
-        String value = System.getProperty(property);
-        if(value != null) {
+        String value = System.getProperty("java.rmi.server.hostname");
+        if (value != null) {
             host = java.net.InetAddress.getByName(value).getHostAddress();
         }
-        return(host);
+        return host;
     }
 
-    class EndpointContext implements ServerEndpoint.ListenContext {
-        List<ServerEndpoint.ListenEndpoint> endpoints = new ArrayList<ServerEndpoint.ListenEndpoint>();
+    static class EndpointContext implements ServerEndpoint.ListenContext {
+        List<ServerEndpoint.ListenEndpoint> endpoints = new ArrayList<>();
 
         @Override
         public ServerEndpoint.ListenCookie addListenEndpoint(ServerEndpoint.ListenEndpoint lep) throws IOException {
@@ -222,7 +221,7 @@ public class ITPortRangeServerSocketFactoryTest {
     }
 
 
-    private class Dispatcher implements RequestDispatcher {
+    private static class Dispatcher implements RequestDispatcher {
         public void dispatch(InboundRequest request) {
             /*try {
            Thread.sleep(5000);
