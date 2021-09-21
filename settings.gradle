@@ -13,6 +13,7 @@ include ':monitor-service'
 include ':rio-cli'
 include ':rio-ui'
 include ':webster'
+include ':jetty'
 include ':watch-ui'
 include ':rio-test'
 include ':rio-int-tests'
@@ -31,6 +32,7 @@ project(':monitor-service').projectDir = "$rootDir/rio-services/monitor/monitor-
 project(':rio-cli').projectDir = "$rootDir/rio-tools/rio-cli" as File
 project(':rio-ui').projectDir = "$rootDir/rio-tools/rio-ui" as File
 project(':webster').projectDir = "$rootDir/rio-tools/webster" as File
+project(':jetty').projectDir = "$rootDir/rio-tools/jetty" as File
 project(':watch-ui').projectDir = "$rootDir/rio-tools/watch-ui" as File
 project(':rio-test').projectDir = "$rootDir/rio-test" as File
 project(':rio-int-tests').projectDir = "$rootDir/rio-int-tests" as File
