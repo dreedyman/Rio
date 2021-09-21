@@ -20,8 +20,9 @@ dependencies {
     compileOnly project(':cybernode-service')
     compileOnly group: 'junit', name: 'junit', version: "${junitVersion}"
     compileOnly project(':webster')
+    compileOnly project(':jetty')
     implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
-    compile project(':resolver-aether')
+    testCompile project(':resolver-aether')
     testCompile project(':cybernode-service')
     testCompile group: 'junit', name: 'junit', version: "${junitVersion}"
     testCompile group: 'org.springframework', name: 'spring-context', version: '5.2.7.RELEASE'
@@ -47,8 +48,6 @@ jar {
     from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
         include "org/rioproject/tools/**"
         include "org/rioproject/cybernode/**"
-        include "org/eclipse/**"
-        include "javax/servlet/**"
     }
 }
 
