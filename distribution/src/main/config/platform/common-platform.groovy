@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-import org.rioproject.config.PlatformCapabilityConfig
+import org.rioproject.start.config.PlatformCapabilityConfig
 
 /**
  * Declare common platform jars

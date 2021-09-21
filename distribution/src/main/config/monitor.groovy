@@ -33,7 +33,7 @@ import org.rioproject.impl.client.JiniClient
 import org.rioproject.monitor.service.selectors.RoundRobinSelector
 import org.rioproject.monitor.service.selectors.ServiceResourceSelector
 import org.rioproject.resolver.RemoteRepository
-import org.rioproject.util.PortUtil
+import org.rioproject.start.util.PortUtil
 
 /*
 * Declare Provision Monitor properties
