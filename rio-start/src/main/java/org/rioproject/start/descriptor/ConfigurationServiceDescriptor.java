@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.start;
+package org.rioproject.start.descriptor;
 
 import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.Configuration;
+import org.rioproject.loader.ServiceClassLoader;
+import org.rioproject.start.util.ClassLoaderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.net.URL;
+import java.lang.reflect.Field;
 import java.net.URLClassLoader;
 
 /**
@@ -29,6 +33,7 @@ public class ConfigurationServiceDescriptor implements ServiceDescriptor {
     private final String classPath;
     private final String implClassName;
     private final Configuration configuration;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationServiceDescriptor.class);
 
     public ConfigurationServiceDescriptor(String classPath,
                                           String implClassName,
@@ -41,13 +46,17 @@ public class ConfigurationServiceDescriptor implements ServiceDescriptor {
     @Override public Object create(Configuration config) throws Exception {
         Thread currentThread = Thread.currentThread();
         ClassLoader currentClassLoader = currentThread.getContextClassLoader();
-
+        if (currentClassLoader instanceof URLClassLoader) {
+            LOGGER.info("====> " + implClassName + ", cL: " + currentClassLoader);
+        }
         URLClassLoader serviceCL = new URLClassLoader(ClassLoaderUtil.getClasspathURLs(classPath),
                                                       currentClassLoader);
         currentThread.setContextClassLoader(serviceCL);
         try {
-            Class<?> implClass = serviceCL.loadClass(implClassName);
+            Class<?> implClass = Class.forName(implClassName, false, serviceCL);
+            //Class<?> implClass = serviceCL.loadClass(implClassName);
             Constructor<?> constructor = implClass.getDeclaredConstructor(Configuration.class);
+            constructor.setAccessible(true);
             Object impl = constructor.newInstance(configuration);
             return new RioServiceDescriptor.Created(impl, null);
         } finally {

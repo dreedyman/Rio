@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.install;
+package org.rioproject.start.install;
 
 import org.rioproject.RioVersion;
 import org.rioproject.resolver.Artifact;
@@ -21,7 +21,7 @@ import org.rioproject.resolver.Resolver;
 import org.rioproject.resolver.ResolverException;
 import org.rioproject.resolver.ResolverHelper;
 import org.rioproject.resolver.maven2.Repository;
-import org.rioproject.util.FileHelper;
+import org.rioproject.start.util.FileHelper;
 import org.rioproject.util.RioHome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +137,7 @@ public final class Installer {
         if (artifactFile == null && pomFile == null)
             throw new IllegalArgumentException("if pomFile is not provided, the artifactFile must not be null");
         boolean overwrite =
-                Boolean.parseBoolean(System.getProperty("org.rioproject.install.overwrite","false"));
+                Boolean.parseBoolean(System.getProperty("org.rioproject.start.install.overwrite","false"));
         File localRepository = Repository.getLocalRepository();
         StringBuilder sb = new StringBuilder();
         String groupId = artifact.getGroupId();

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.util;
+package org.rioproject.start.util;
 
 import com.sun.jini.config.ConfigUtil;
 import com.sun.jini.start.ServiceDescriptor;
@@ -21,8 +21,9 @@ import org.rioproject.RioVersion;
 import org.rioproject.config.Constants;
 import org.rioproject.config.DynamicConfiguration;
 import org.rioproject.net.HostUtil;
-import org.rioproject.start.ConfigurationServiceDescriptor;
-import org.rioproject.start.RioServiceDescriptor;
+import org.rioproject.start.descriptor.ConfigurationServiceDescriptor;
+import org.rioproject.start.descriptor.RioServiceDescriptor;
+import org.rioproject.util.RioHome;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -51,14 +52,14 @@ public final class ServiceDescriptorUtil {
     }
 
     static int getStartupPort() throws IOException {
-        if(port==0) {
-            if(System.getProperty(Constants.PORT_RANGE)!=null) {
+        if (port == 0) {
+            if (System.getProperty(Constants.PORT_RANGE)!=null) {
                 port = PortUtil.getPortFromRange(System.getProperty(Constants.PORT_RANGE));
             } else {
                 port = PortUtil.getAnonymousPort();
             }
         }
-        return(port);
+        return port;
     }
 
     /**
@@ -83,12 +84,12 @@ public final class ServiceDescriptorUtil {
                                                final String[] roots,
                                                final String putDirectory) throws IOException {
         String[] options = null;
-        if(putDirectory!=null) {
+        if (putDirectory!=null) {
             options = new String[2];
             options[0] = "-putDirectory";
             options[1] = putDirectory;
         }
-        return(getWebster(policy, sPort, roots, options, false));
+        return getWebster(policy, sPort, roots, options, false);
     }
 
     /**
@@ -106,7 +107,7 @@ public final class ServiceDescriptorUtil {
      * set
      */
     public static ServiceDescriptor getWebster(final String policy, final String[] roots) throws IOException {
-        return(getWebster(policy, "0", roots));
+        return getWebster(policy, "0", roots);
     }
 
     /**
@@ -127,7 +128,7 @@ public final class ServiceDescriptorUtil {
     public static ServiceDescriptor getWebster(final String policy,
                                                final String sPort,
                                                final String[] roots) throws IOException {
-        return(getWebster(policy, sPort, roots, false));
+        return getWebster(policy, sPort, roots, false);
     }
 
     /**
@@ -150,7 +151,7 @@ public final class ServiceDescriptorUtil {
                                                final String sPort,
                                                final String[] roots,
                                                final String[] options) throws IOException {
-        return(getWebster(policy, sPort, roots, options, false));
+        return getWebster(policy, sPort, roots, options, false);
     }
 
     /**
@@ -172,10 +173,10 @@ public final class ServiceDescriptorUtil {
                                                final String[] roots,
                                                final boolean debug) throws IOException {
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome==null)
+        if (rioHome == null)
             throw new RuntimeException("rio.home property not declared or derivable");
-        String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
-        return(getWebster(policy, sPort, roots, null, debug, webster));
+        String webster = rioHome + File.separator + "lib" + File.separator + createVersionedJar("webster");
+        return getWebster(policy, sPort, roots, null, debug, webster);
 
     }
 
@@ -200,10 +201,10 @@ public final class ServiceDescriptorUtil {
                                                final String[] options,
                                                final boolean debug) throws IOException {
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome==null)
+        if (rioHome == null)
             throw new RuntimeException("rio.home property not declared or derivable");
         String webster = rioHome+File.separator+"lib"+File.separator+createVersionedJar("webster");
-        return(getWebster(policy, sPort, roots, options, debug, webster));
+        return getWebster(policy, sPort, roots, options, debug, webster);
     }
 
     /**
@@ -229,17 +230,17 @@ public final class ServiceDescriptorUtil {
                                                final String[] options,
                                                final boolean debug,
                                                final String webster) throws IOException {
-        if(webster==null)
+        if (webster == null)
             throw new IllegalArgumentException("webster jar cannot be null");
         String portOptionArg = "-port";
         String portArg;
-        if(sPort.contains("-")) {
+        if (sPort.contains("-")) {
             portOptionArg = "-portRange";
             portArg = sPort;
         } else {
             try {
                 int p = Integer.parseInt(sPort);
-                port = p==0?getStartupPort():p;
+                port = p == 0 ? getStartupPort() : p;
                 portArg = Integer.toString(port);
             } catch(NumberFormatException e) {
                 throw new RuntimeException("invalid port ["+sPort+"]");
@@ -248,19 +249,19 @@ public final class ServiceDescriptorUtil {
         String websterRoots = ConfigUtil.concat(roots);
         String websterClass = "org.rioproject.tools.webster.Webster";
 
-        if(debug) {
-            System.setProperty("org.rioproject.tools.webster.debug", "1");
+        if (debug) {
+            System.setProperty("webster.debug", "1");
         }
         String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
         List<String> optionsList = new ArrayList<>();
-        if(options!=null) {
+        if (options!=null) {
             Collections.addAll(optionsList, options);
         }
-        if(!optionsList.contains("-roots")) {
+        if (!optionsList.contains("-roots")) {
             optionsList.add("-roots");
             optionsList.add(websterRoots);
         }
-        if(!optionsList.contains("-bindAddress")) {
+        if (!optionsList.contains("-bindAddress")) {
             optionsList.add("-bindAddress");
             optionsList.add(address);
         }
@@ -270,8 +271,10 @@ public final class ServiceDescriptorUtil {
                                         policy,
                                         webster,
                                         websterClass,
-                                        optionsList.toArray(new String[optionsList.size()]));
+                                        optionsList.toArray(new String[0]));
     }
+
+
 
     public static ServiceDescriptor getJetty(final String sPort,
                                              final String[] roots) {
@@ -308,43 +311,38 @@ public final class ServiceDescriptorUtil {
                                              final boolean secure) {
 
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome == null) {
+        if (rioHome == null) {
             throw new RuntimeException("rio.home property not declared or derivable");
         }
-        String webster = rioHome + File.separator + "lib" + File.separator + createVersionedJar("webster");
-
+        String websterJetty = rioHome + File.separator + "lib" + File.separator + createVersionedJar("webster-jetty");
+        StringBuilder jettyJars = new StringBuilder();
+        jettyJars.append(websterJetty);
+        /*
+        File jettyDir = new File(rioHome + File.separator + "lib" + File.separator +  "jetty");
+        if (jettyDir.listFiles() != null) {
+            for (File jar : jettyDir.listFiles()) {
+                jettyJars.append(File.pathSeparator);
+                jettyJars.append(jar.getPath());
+            }
+        }*/
         DynamicConfiguration config = new DynamicConfiguration();
-        config.setEntry("org.rioproject.tools.jetty",
-                        "port",
-                        int.class,
-                        Integer.parseInt(sPort));
-        config.setEntry("org.rioproject.tools.jetty",
-                        "roots",
-                        String[].class,
-                        roots);
-        config.setEntry("org.rioproject.tools.jetty",
-                        "secure",
-                        Boolean.class,
-                        secure);
-        if(putDir!=null)
-            config.setEntry("org.rioproject.tools.jetty",
-                            "putDir",
-                            String.class,
-                            putDir);
-        if(minThreads > 0)
-            config.setEntry("org.rioproject.tools.jetty",
-                            "minThreads",
-                            int.class,
-                            minThreads);
-        if(maxThreads > 0)
-            config.setEntry("org.rioproject.tools.jetty",
-                            "maxThreads",
-                            int.class,
-                            maxThreads);
+        String component = "org.rioproject.tools.jetty";
+        config.setEntry(component, "port", int.class, Integer.parseInt(sPort));
+        config.setEntry(component, "roots", String[].class, roots);
+        config.setEntry(component, "secure", Boolean.class, secure);
+        if (putDir != null) {
+            config.setEntry(component, "putDir", String.class, putDir);
+        }
+        if (minThreads > 0) {
+            config.setEntry(component, "minThreads", int.class, minThreads);
+        }
+        if (maxThreads > 0) {
+            config.setEntry(component, "maxThreads", int.class, maxThreads);
+        }
 
         String jettyClass = "org.rioproject.tools.jetty.Jetty";
 
-        return new ConfigurationServiceDescriptor(webster, jettyClass, config);
+        return new ConfigurationServiceDescriptor(jettyJars.toString(), jettyClass, config);
     }
 
     /**
@@ -365,22 +363,20 @@ public final class ServiceDescriptorUtil {
         String cybernodeClasspath = getCybernodeClasspath();
         String cybernodeCodebase = getCybernodeCodebase();
         String implClass = "org.rioproject.cybernode.service.CybernodeImpl";
-        return(new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig));
+        return new RioServiceDescriptor(cybernodeCodebase, policy, cybernodeClasspath, implClass, cybernodeConfig);
     }
 
-    public static String getCybernodeClasspath() throws IOException {
+    public static String getCybernodeClasspath() {
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome == null)
+        if (rioHome == null)
             throw new RuntimeException("rio.home property not declared or derivable");
-        List<String> jarList = new ArrayList<String>();
+        List<String> jarList = new ArrayList<>();
         jarList.add(createVersionedJar("cybernode-service"));
-        if(System.getProperty("rio.test.attach")!=null) {
+        if (System.getProperty("rio.test.attach") != null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
             jarList.add(createVersionedJar("rio-int-test"));
         }
-        StringBuilder classPath = new StringBuilder();
-        classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
-        return classPath.toString();
+        return makePath(rioHome + File.separator + "lib", jarList.toArray(new String[0]));
     }
 
     public static String getCybernodeCodebase() throws UnknownHostException {
@@ -413,21 +409,21 @@ public final class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getMonitor(final String policy, final String... monitorConfig) throws IOException {
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome == null)
+        if (rioHome == null)
             throw new RuntimeException("rio.home property not declared or derivable");
-        List<String> jarList = new ArrayList<String>();
+        List<String> jarList = new ArrayList<>();
         jarList.add(createVersionedJar("monitor-service"));
-        if(System.getProperty("rio.test.attach")!=null) {
+        if (System.getProperty("rio.test.attach")!=null) {
             System.setProperty(Constants.RESOLVER_JAR, getProjectResolverLocation(rioHome));
             jarList.add(createVersionedJar("rio-int-test"));
         }
         StringBuilder classPath = new StringBuilder();
-        classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[jarList.size()])));
+        classPath.append(makePath(rioHome+File.separator+"lib", jarList.toArray(new String[0])));
         String implClass = "org.rioproject.monitor.service.ProvisionMonitorImpl";
         String monitorCodebase =
             createAnnotatedArtifactURL(String.format("artifact:org.rioproject.monitor/monitor-proxy/%s",
                                                      RioVersion.VERSION));
-        return (new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig));
+        return new RioServiceDescriptor(monitorCodebase, policy, classPath.toString(), implClass, monitorConfig);
     }
 
     static String createAnnotatedArtifactURL(final String artifact) throws UnknownHostException {
@@ -453,15 +449,14 @@ public final class ServiceDescriptorUtil {
      */
     public static ServiceDescriptor getLookup(final String policy, final String... lookupConfig) throws IOException {
         String rioHome = System.getProperty("rio.home", RioHome.get());
-        if(rioHome == null)
+        if (rioHome == null)
             throw new RuntimeException("rio.home property not declared or derivable");
         String reggieClasspath = FileHelper.find(new File(rioHome, "lib"), "reggie").getPath();
         File reggieDL = FileHelper.find(new File(rioHome, "lib-dl"), "reggie-dl");
-        //String reggieCodebase = "artifact:org.apache.river/reggie-dl/"+ FileHelper.getJarVersion(reggieDL.getName());
         String reggieCodebase = createAnnotatedArtifactURL(String.format("artifact:org.apache.river/reggie-dl/%s",
                                                                          FileHelper.getJarVersion(reggieDL.getName())));
         String implClass = "com.sun.jini.reggie.TransientRegistrarImpl";
-        return (new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig));
+        return new RioServiceDescriptor(reggieCodebase, policy, reggieClasspath, implClass, lookupConfig);
     }
 
     /**
@@ -469,31 +464,31 @@ public final class ServiceDescriptorUtil {
      *
      * @throws UnknownHostException If the host cannot be resolved
      */
+    @SuppressWarnings("unused")
     public static void checkForLoopback() throws UnknownHostException {
         InetAddress address = HostUtil.getInetAddressFromProperty(Constants.RMI_HOST_ADDRESS);
-        if(address.isLoopbackAddress()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("\n");
-            builder.append("*******************************************************************************\n");
-            builder.append("* The network interface to be used has a loopback address of ");
-            builder.append(address.getHostAddress()).append(".\n");
-            builder.append("* You may encounter issues communicating to services outside of your machine.\n");
-            builder.append("*******************************************************************************\n");
-            LoggerFactory.getLogger("org.rioproject").warn(builder.toString());
+        if (address.isLoopbackAddress()) {
+            String loopback = "\n" +
+                    "*******************************************************************************\n" +
+                    "* The network interface to be used has a loopback address of " +
+                    address.getHostAddress() + ".\n" +
+                    "* You may encounter issues communicating to services outside of your machine.\n" +
+                    "*******************************************************************************\n";
+            LoggerFactory.getLogger("org.rioproject").warn(loopback);
         }
     }
 
     protected static String makePath(final String dir, final String... jars) {
         StringBuilder sb = new StringBuilder();
         for(String jar : jars) {
-            if(sb.length()>0)
+            if (sb.length() > 0)
                 sb.append(File.pathSeparator);
             sb.append(dir).append(File.separator).append(jar);
         }
         return sb.toString();
     }
 
-    private static String createVersionedJar(String name) {
+    public static String createVersionedJar(String name) {
         return String.format("%s-%s.jar", name, RioVersion.VERSION);
     }
 

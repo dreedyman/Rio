@@ -17,6 +17,7 @@ package org.rioproject.config;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.rioproject.start.config.RioProperties;
 
 /**
  * Test loading properties from rio.env

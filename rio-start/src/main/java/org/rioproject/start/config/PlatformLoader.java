@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.config;
+package org.rioproject.start.config;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import org.rioproject.RioVersion;
-import org.rioproject.util.FileHelper;
+import org.rioproject.start.util.FileHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +49,10 @@ public class PlatformLoader {
      */
     @SuppressWarnings("unchecked")
     public PlatformCapabilityConfig[] parsePlatform(String directory) throws Exception {
-        if(directory == null)
+        if (directory == null)
             throw new IllegalArgumentException("directory is null");
 
-        if(platformList.isEmpty()) {
+        if (platformList.isEmpty()) {
             File dir = new File(directory);
             if (dir.exists()) {
                 if (dir.isDirectory()) {
@@ -137,29 +137,32 @@ public class PlatformLoader {
      * @throws Exception if the rioHome does not exist
      */
     public PlatformCapabilityConfig[] getDefaultPlatform(String rioHome) throws Exception {
-        if(System.getProperty("StaticCybernode")!=null)
+        if (System.getProperty("StaticCybernode") != null)
             return new PlatformCapabilityConfig[0];
-        if(rioHome==null) {
+        if (rioHome == null) {
             logger.warn("rio.home is not set, returning empty platform configuration");
             return new PlatformCapabilityConfig[0];
         }
         File rioHomeDir = new File(rioHome);
-        if(!rioHomeDir.exists())
+        if (!rioHomeDir.exists())
             throw new Exception(rioHome+" does not exist");
 
+        List<File> jars = new ArrayList<>();
         File libDl = new File(rioHomeDir, "lib-dl");
-        File rioApiJar = new File(libDl, String.format("rio-api-%s.jar", RioVersion.VERSION));
-        File rioProxyJar = new File(libDl, String.format("rio-proxy-%s.jar", RioVersion.VERSION));
         File serviceUiJar = FileHelper.find(libDl, "serviceui");
-        File rioLibJar = new File(rioHomeDir, "lib"+File.separator+String.format("rio-lib-%s.jar", RioVersion.VERSION));
+        if (serviceUiJar == null) {
+            logger.warn("Could not locate serviceui jar in " + libDl.getPath());
+        } else {
+            checkAndMaybeAdd(serviceUiJar,
+                             jars);
+        }
+        File rioLibJar = new File(rioHomeDir,
+                                  "lib" + File.separator + String.format("rio-lib-%s.jar", RioVersion.VERSION));
+        checkAndMaybeAdd(rioLibJar, jars);
         StringBuilder pathBuilder = new StringBuilder();
-        pathBuilder.append(rioLibJar.getAbsolutePath()).append(File.pathSeparator);
-        pathBuilder.append(rioProxyJar.getAbsolutePath()).append(File.pathSeparator);
-        pathBuilder.append(rioApiJar.getAbsolutePath()).append(File.pathSeparator);
-        if(serviceUiJar!=null && serviceUiJar.exists())
-            pathBuilder.append(serviceUiJar.getAbsolutePath());
-        else
-            logger.warn("serviceui jar does not exist in {}", libDl.getPath());
+        for (File jar : jars) {
+            pathBuilder.append(jar.getAbsolutePath()).append(File.pathSeparator);
+        }
 
         PlatformCapabilityConfig rioCap = new PlatformCapabilityConfig("Rio",
                                                                        RioVersion.VERSION,
@@ -182,7 +185,15 @@ public class PlatformLoader {
             logger.warn("jsk-lib jar does not exist in {}", libDir.getPath());
         }
 
-        return(c.toArray(new PlatformCapabilityConfig[0]));
+        return c.toArray(new PlatformCapabilityConfig[0]);
+    }
+
+    private void checkAndMaybeAdd(File jar, List<File> jars) {
+        if (jar != null && jar.exists()) {
+            jars.add(jar);
+        } else {
+            logger.warn(jar.getName() + " does not exist");
+        }
     }
 
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.config;
+package org.rioproject.start.config;
 
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverException;

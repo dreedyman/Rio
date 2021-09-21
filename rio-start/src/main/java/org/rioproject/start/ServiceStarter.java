@@ -21,7 +21,8 @@ import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
 import net.jini.config.ConfigurationProvider;
 import net.jini.config.EmptyConfiguration;
-import org.rioproject.config.RioProperties;
+import org.rioproject.start.config.RioProperties;
+import org.rioproject.start.descriptor.RioServiceDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

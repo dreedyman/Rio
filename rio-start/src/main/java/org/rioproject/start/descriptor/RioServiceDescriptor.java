@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.rioproject.start;
+package org.rioproject.start.descriptor;
 
 import com.sun.jini.config.Config;
 import com.sun.jini.start.*;
@@ -22,13 +22,14 @@ import net.jini.export.ProxyAccessor;
 import net.jini.security.BasicProxyPreparer;
 import net.jini.security.ProxyPreparer;
 import net.jini.security.policy.PolicyFileProvider;
-import org.rioproject.config.PlatformCapabilityConfig;
-import org.rioproject.config.PlatformLoader;
+import org.rioproject.start.config.PlatformCapabilityConfig;
+import org.rioproject.start.config.PlatformLoader;
 import org.rioproject.loader.ClassAnnotator;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.loader.ServiceClassLoader;
 import org.rioproject.resolver.Artifact;
 import org.rioproject.resolver.ResolverHelper;
+import org.rioproject.start.util.ClassLoaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,10 +92,11 @@ public class RioServiceDescriptor implements ServiceDescriptor {
     private final String[] serverConfigArgs;
     private final LifeCycle lifeCycle;
     // default, no-op
-// object
+    // object
     private static final LifeCycle NoOpLifeCycle = impl -> false;
     private static AggregatePolicyProvider globalPolicy = null;
     private static Policy initialGlobalPolicy = null;
+
     /**
      * Object returned by
      * {@link RioServiceDescriptor#create(net.jini.config.Configuration)
@@ -221,7 +223,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         if (rioHome == null) {
             logger.warn("rio.home not defined, no default platformDir");
         } else {
-            defaultDir = rioHome+ File.separator+"config"+File.separator+"platform";
+            defaultDir = rioHome + File.separator + "config" + File.separator + "platform";
             PlatformLoader platformLoader = new PlatformLoader();
 
             PlatformCapabilityConfig[] caps = platformLoader.getDefaultPlatform(rioHome);
@@ -279,7 +281,8 @@ public class RioServiceDescriptor implements ServiceDescriptor {
             serviceClassPath = classpath;
         }
         ServiceClassLoader serviceCL =
-            new ServiceClassLoader(ServiceClassLoader.getURIs(ClassLoaderUtil.getClasspathURLs(serviceClassPath)),
+            new ServiceClassLoader(ServiceClassLoader.getURIs(ClassLoaderUtil
+                                                                      .getClasspathURLs(serviceClassPath)),
                                    annotator,
                                    commonCL);
         if (logger.isDebugEnabled())
@@ -311,8 +314,7 @@ public class RioServiceDescriptor implements ServiceDescriptor {
         }
         Object impl;
         try {
-            Class<?> implClass;
-            implClass = Class.forName(implClassName, false, serviceCL);
+            Class<?> implClass = Class.forName(implClassName, false, serviceCL);
             if (logger.isTraceEnabled())
                 logger.trace("Attempting to get implementation constructor");
             Constructor<?> constructor = implClass.getDeclaredConstructor(actTypes);
