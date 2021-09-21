@@ -19,6 +19,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * Helper class to create KeyStores.
@@ -71,5 +75,26 @@ public class KeyStoreHelper {
             keyStore.load(in, null);
         }
         return keyStore;
+    }
+
+    /**
+     * Check if the certificate represented by the alias is not expired.
+     *
+     * @param keyStore The KeyStore to use.
+     * @param alias The alias of the certificate.
+     *
+     * @return true if the certificate has not expired, false if the given alias does not exist, does not contain
+     * a certificate or has expired.
+     *
+     * @exception KeyStoreException if the keystore has not been initialized (loaded).
+     */
+    public static boolean notExpired(KeyStore keyStore, String alias) throws KeyStoreException {
+        X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
+        if (certificate == null) {
+            return false;
+        }
+        Date notAfter = certificate.getNotAfter();
+        Instant now = Instant.now();
+        return now.isBefore(notAfter.toInstant());
     }
 }
