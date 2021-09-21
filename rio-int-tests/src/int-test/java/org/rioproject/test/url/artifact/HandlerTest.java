@@ -41,8 +41,9 @@ public class HandlerTest {
     }
 
     @Test
+    @Ignore
     public void testURLWithRepositories() throws IOException {
-        URL u = new URL("artifact:org.rioproject/boot/4.0;http://www.rio-project.org/maven2");
+        URL u = new URL("artifact:org.rioproject/boot/4.0;https://repo.repsy.io/mvn/dreedy/maven");
         URLConnection connect = u.openConnection();
         Assert.assertNotNull(connect);
     }
