@@ -102,7 +102,7 @@ public class WebsterUTest {
 
     @Test
     public void verifyGetFromWebster() throws Exception {
-        Webster w = new Webster(new File(System.getProperty("user.dir")+"/src/test/resources/webster.groovy"));
+        Webster w = new Webster(new File(System.getProperty("user.dir") + "/src/test/resources/webster.groovy"));
         assertNotNull(w);
         List<String> items = get(w.getPort());
         assertNotNull(items);
@@ -120,6 +120,13 @@ public class WebsterUTest {
     public void testGetDirectory() throws Exception {
         Webster w = new Webster(0, System.getProperty("user.dir"));
         get(w.getPort(), "/%2e/");
+    }
+
+    @Test
+    public void testUseTempDirectory() throws Exception {
+        Webster w = new Webster(0, System.getProperty("java.io.tmpdir"));
+        List<String> items = get(w.getPort());
+        assertNotNull(items);
     }
 
     private List<String> get(int port) throws IOException {

@@ -19,7 +19,7 @@ import com.sun.jini.start.ServiceDescriptor;
 import net.jini.config.EmptyConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
-import org.rioproject.util.ServiceDescriptorUtil;
+import org.rioproject.start.util.ServiceDescriptorUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

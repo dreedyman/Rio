@@ -21,15 +21,17 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rioproject.config.DynamicConfiguration;
+import org.rioproject.security.KeyStoreHelper;
 import org.rioproject.security.SecureEnv;
 import org.rioproject.util.RioHome;
-import org.rioproject.util.ServiceDescriptorUtil;
+import org.rioproject.start.util.ServiceDescriptorUtil;
 
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
@@ -38,6 +40,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test Jetty & Webster concurrency
@@ -45,18 +48,22 @@ import static org.junit.Assert.*;
  * Created by Dennis Reedy on 6/19/17.
  */
 public class JettyTest {
+    private static boolean notExpired;
 
     @BeforeClass
     public static void setup() throws Exception {
         String keyStorePath = String.format("%s/config/security/rio-cert.ks", RioHome.get());
         SecureEnv.setup(keyStorePath);
+        KeyStore keyStore = KeyStoreHelper.load(keyStorePath);
+        notExpired = KeyStoreHelper.notExpired(keyStore, "rio-project");
     }
 
     @Test
     public void testSecure() throws Exception {
+        assumeTrue(notExpired);
         String projectDir = System.getProperty("projectDir");
         File fileDir = new File(projectDir+"/build/files-0");
-        if(fileDir.mkdirs())
+        if (fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
         Jetty jetty = new Jetty().setRoots(fileDir.getPath()).setPutDir(fileDir.getPath());
         jetty.startSecure();
@@ -71,11 +78,15 @@ public class JettyTest {
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
         File fileDir = new File(projectDir+"/build/files-1");
-        if(fileDir.mkdirs())
+        if (fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
 
         Jetty jetty = new Jetty().setRoots(fileDir.getPath()).setPutDir(fileDir.getPath());
-        jetty.startSecure();
+        if (notExpired) {
+            jetty.startSecure();
+        } else {
+            jetty.start();
+        }
         String jettyURL = jetty.getURI().toString();
         /*0, new String[]{fileDir.getPath()}, fileDir.getPath());*/
         //String jettyURL = String.format("https://%s:%s", jetty.getAddress(), jetty.getPort());
@@ -131,10 +142,14 @@ public class JettyTest {
         String projectDir = System.getProperty("projectDir");
         String resources = new File(projectDir+"/src/test/resources").getPath();
         File fileDir = new File(projectDir+"/build/files-2");
-        if(fileDir.mkdirs())
+        if (fileDir.mkdirs())
             System.out.println("Created "+fileDir.getPath());
         Jetty jetty = new Jetty().setRoots(resources).setPutDir(fileDir.getPath());
-        jetty.startSecure();
+        if (notExpired) {
+            jetty.startSecure();
+        } else {
+            jetty.start();
+        }
 
         int count = 5;
         CyclicBarrier gate = new CyclicBarrier(count+1);
@@ -158,6 +173,35 @@ public class JettyTest {
             }
         }
         System.out.println("Total failed Fetchers: "+totalFailed);
+    }
+
+    @Test(expected = IOException.class)
+    public void testDirectoryTraversal() throws Exception {
+        Jetty jetty = new Jetty().setRoots(System.getProperty("user.dir"));
+        jetty.start();
+        get(jetty.getPort(), "/%2e%2e/");
+    }
+
+    @Test
+    public void testGetDirectory() throws Exception {
+        Jetty jetty = new Jetty().setRoots(System.getProperty("user.dir"));
+        jetty.start();
+        //get(jetty.getPort(), "/%2e%2e/webster");
+        get(jetty.getPort(), "/%2e");
+    }
+
+    private void get(int port, String path) throws IOException {
+        URL url = new URL("http://" + InetAddress.getLocalHost().getHostName()+ ":" + port + path);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            List<String> items = new ArrayList<>();
+            String line;
+            while ((line = in.readLine()) != null) {
+                items.add(line);
+            }
+        }
     }
 
     private void upload(URL url, File file) throws IOException {
@@ -201,7 +245,7 @@ public class JettyTest {
                     } catch (IOException e) {
                         failed++;
                         System.out.println("Failed writing "+f.getName()+", "+e.getClass().getName()+": "+e.getMessage());
-                        if(e instanceof SocketException) {
+                        if (e instanceof SocketException) {
                             Thread.sleep(50);
                         } else {
                             e.printStackTrace();

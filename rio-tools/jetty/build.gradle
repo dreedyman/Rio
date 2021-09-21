@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-description = 'Module :: Webster'
+description = 'Module :: Webster Jetty'
+
+ext {
+    jettyVersion = "9.4.43.v20210629"
+}
 
 dependencies {
-    compileOnly project(':rio-lib')
-    compileOnly project(':rio-start')
+    compile project(':rio-lib')
+    compile project(':rio-start')
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: "$jettyVersion"
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
     compileOnly group: 'org.codehaus.groovy', name: 'groovy-all', version: "${groovyVersion}"
     testCompile project(':rio-lib')
     testCompile project(':rio-start')
+    //testCompile group: 'org.eclipse.jetty', name: 'jetty-server', version: "$jettyVersion"
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile logRuntime
 }
 
 test {
     systemProperty "java.security.policy", policyAll
-    systemProperty "WEBSTER_JAR", "${project.buildDir.path}/webster-${project.version}.jar"
+    systemProperty "WEBSTER_JAR", "${project.buildDir.path}/webster-jetty${project.version}.jar"
     systemProperty "projectDir", project.projectDir.path
     systemProperty "build.dir", project.buildDir.path
     systemProperty "rio.home", "${rootProject.projectDir}/distribution/src/main"
@@ -42,15 +48,11 @@ jar {
                 "Rio-Build": buildTime
         )
     }
-    //baseName = "webster"
-    archiveBaseName.convention("webster")
-    archiveBaseName.set("webster")
-    dependsOn classes
-    from(sourceSets.main.output) {
-        include "org/rioproject/**"
-    }
-    from(configurations.compileOnly.collect { it.isDirectory() ? it : zipTree(it) }) {
+    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
         include "org/rioproject/web/**"
+        include "org/eclipse/**"
+        include "javax/**"
     }
-
+    archivesBaseName = "webster-jetty"
 }
+
