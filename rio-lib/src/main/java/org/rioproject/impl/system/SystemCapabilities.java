@@ -17,8 +17,8 @@ package org.rioproject.impl.system;
 
 import net.jini.config.Configuration;
 import net.jini.config.ConfigurationException;
-import org.rioproject.config.PlatformCapabilityConfig;
-import org.rioproject.config.PlatformLoader;
+import org.rioproject.start.config.PlatformCapabilityConfig;
+import org.rioproject.start.config.PlatformLoader;
 import org.rioproject.costmodel.ResourceCostModel;
 import org.rioproject.impl.system.capability.PlatformCapabilityLoader;
 import org.rioproject.impl.system.measurable.MeasurableCapability;
