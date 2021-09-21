@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,22 +34,30 @@ public class SecureEnv {
     public static boolean setup() throws Exception {
         String keyStores = System.getProperty(Constants.KEYSTORE);
         if (keyStores != null) {
-            setup(keyStores.split(","));
-            return true;
+            return setup(keyStores.split(","));
         }
         return false;
     }
 
-    public static void setup(String... keystorePaths) throws Exception {
+    public static boolean setup(String... keystorePaths) throws Exception {
         List<KeyStore> keyStores = new ArrayList<>();
         for (String keyStorePath : keystorePaths) {
             LOGGER.debug("Loading {}", keyStorePath);
             File keyStoreFile = new File(keyStorePath);
-            keyStores.add(KeyStoreHelper.load(keyStoreFile));
+            KeyStore keyStore = KeyStoreHelper.load(keyStoreFile);
+            for (String a : Collections.list(keyStore.aliases())) {
+                if (KeyStoreHelper.notExpired(keyStore, a)) {
+                    keyStores.add(KeyStoreHelper.load(keyStoreFile));
+                }
+            }
         }
-        LOGGER.debug("Initialize AggregateTrustManager");
-        AggregateTrustManager.initialize(keyStores.toArray(new KeyStore[0]));
-        LOGGER.debug("Allow all host names");
-        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((hostname, sslSession) -> true);
+        if (!keyStores.isEmpty()) {
+            LOGGER.debug("Initialize AggregateTrustManager");
+            AggregateTrustManager.initialize(keyStores.toArray(new KeyStore[0]));
+            LOGGER.debug("Allow all host names");
+            javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((hostname, sslSession) -> true);
+            return true;
+        }
+        return false;
     }
 }
