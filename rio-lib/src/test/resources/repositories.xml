@@ -1,9 +1,9 @@
 <repositories>
-  <repository id='rio' url='http://www.rio-project.org/maven2'>
+  <repository id='rio' url='https://repo.repsy.io/mvn/dreedy/maven'>
     <snapshots supported='true' policy='daily' checksumPolicy='warn' />
     <releases supported='true' policy='daily' checksumPolicy='warn' />
   </repository>
-  <repository id='central' url='http://repo1.maven.org/maven2'>
+  <repository id='central' url='https://repo1.maven.org/maven2'>
     <snapshots supported='false' policy='daily' checksumPolicy='warn' />
     <releases supported='true' policy='daily' checksumPolicy='warn' />
   </repository>

@@ -45,12 +45,7 @@ manager {
 
     inheritOptions = true
 
-    /* Get the directory that the logging FileHandler will create the service log.  */
-    String opSys = System.getProperty('os.name')
-    String rootLogDir = opSys.startsWith("Windows")?System.getProperty("java.io.tmpdir"):'/tmp'
-    String name = System.getProperty('user.name')
-
-    log = "${rootLogDir}${File.separator}${name}${File.separator}logs"
+    log = "${rioHome}${File.separator}logs"
 
     String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
     System.setProperty("hostAddress", address)

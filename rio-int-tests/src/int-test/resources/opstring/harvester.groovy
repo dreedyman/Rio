@@ -4,14 +4,7 @@ import org.rioproject.tools.harvest.Harvester
 import org.rioproject.config.Constants
 
 static String getLogDir() {
-    String logDir = "/tmp/${System.getProperty('user.name')}/logs"
-    String opSys = System.getProperty('os.name')
-    if(opSys.startsWith("Windows")) {
-        logDir = '${java.io.tmpdir}'
-    }
-    String logRoot = System.getProperty(Constants.GROUPS_PROPERTY_NAME,
-                                        System.getProperty('user.name'))
-    return logDir+'${/}'+logRoot
+    "${System.getProperty('rio.home')}/logs"
 }
 
 deployment(name:'Harvester') {

@@ -19,13 +19,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 class ConnectionCheck {
+
     static boolean connected() {
         boolean online = true;
         try {
-            URL url = new URL("http://www.rio-project.org/maven2");
+            URL url = new URL("https://repo.repsy.io/mvn/dreedy/maven");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.getResponseCode();
-        } catch(Exception e) {
+        } catch (Exception e) {
             online = false;
         }
         return online;
