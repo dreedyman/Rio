@@ -15,7 +15,7 @@
  */
 package org.rioproject.impl.system.capability;
 
-import org.rioproject.config.PlatformCapabilityConfig;
+import org.rioproject.start.config.PlatformCapabilityConfig;
 import org.rioproject.loader.CommonClassLoader;
 import org.rioproject.system.capability.PlatformCapability;
 

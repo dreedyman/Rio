@@ -17,8 +17,8 @@ package org.rioproject.impl.system.capability;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.rioproject.config.PlatformCapabilityConfig;
-import org.rioproject.config.PlatformLoader;
+import org.rioproject.start.config.PlatformCapabilityConfig;
+import org.rioproject.start.config.PlatformLoader;
 import org.rioproject.system.capability.PlatformCapability;
 
 import java.io.File;

@@ -34,7 +34,7 @@ class OARRepositoryLoadTest extends GroovyTestCase {
         assertTrue(remoteRepositories.length==2)
         RemoteRepository rio = remoteRepositories[0]
         assertTrue rio.id.equals('rio')
-        assertTrue rio.url.equals('http://www.rio-project.org/maven2')
+        assertTrue rio.url.equals("https://repo.repsy.io/mvn/dreedy/maven")
         assertTrue rio.supportsSnapshots()
         assertTrue rio.supportsReleases()
         assertTrue rio.releaseChecksumPolicy=='warn'
@@ -49,7 +49,7 @@ class OARRepositoryLoadTest extends GroovyTestCase {
         assertTrue(remoteRepositories.length==2)
         RemoteRepository central = remoteRepositories[1]
         assertTrue central.id.equals('central')
-        assertTrue central.url.equals('http://repo1.maven.org/maven2')
+        assertTrue central.url.equals('https://repo1.maven.org/maven2')
         assertTrue !central.supportsSnapshots()
         assertTrue central.supportsReleases()
         assertTrue central.releaseChecksumPolicy=='warn'

@@ -43,7 +43,7 @@ import org.rioproject.opstring.ServiceBeanConfig;
 import org.rioproject.opstring.ServiceElement;
 import org.rioproject.servicebean.ServiceBeanContext;
 import org.rioproject.sla.ServiceLevelAgreements;
-import org.rioproject.util.MulticastStatus;
+import org.rioproject.start.util.MulticastStatus;
 import org.rioproject.watch.ThresholdValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

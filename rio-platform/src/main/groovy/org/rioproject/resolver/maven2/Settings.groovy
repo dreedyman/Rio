@@ -37,7 +37,7 @@ class Settings {
         }
         /* Add central last of all */
         RemoteRepository central = new RemoteRepository()
-        central.url = "http://repo1.maven.org/maven2/"
+        central.url = "https://repo1.maven.org/maven2/"
         central.id = "central"
         central.snapshots = false
         checkMirrors(central)

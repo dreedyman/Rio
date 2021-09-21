@@ -33,23 +33,26 @@ public class ITResolverConcurrencyTest {
     @Test
     public void testConcurrentAccess() throws ExecutionException, InterruptedException {
         AetherResolver r = new AetherResolver();
-        List<RemoteRepository> repos = new ArrayList<RemoteRepository>();
+        List<RemoteRepository> repos = new ArrayList<>();
         RemoteRepository central = new RemoteRepository();
         central.setId("central");
-        central.setUrl("http://repo1.maven.org/maven2");
+        central.setUrl("https://repo1.maven.org/maven2");
         repos.add(central);
         r.setRemoteRepositories(repos);
         ExecutorService resolverExecutor = Executors.newCachedThreadPool();
         System.out.println("Create 100 threads");
         long t0 = System.currentTimeMillis();
-        List<Future<String[]>> futures = new ArrayList<Future<String[]>>();
-        for(int i=0; i<100; i++) {
+        List<Future<String[]>> futures = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
             futures.add(resolverExecutor.submit(new Request(r)));
         }
-        Assert.assertTrue(futures.size() == 100);
-        for(Future<String[]> future : futures) {
+        Assert.assertEquals(100,
+                            futures.size());
+        for (Future<String[]> future : futures) {
             String[] classPath = future.get();
-            Assert.assertTrue("Expected 7 jars, got " + classPath.length, classPath.length == 7);
+            Assert.assertEquals("Expected 7 jars, got " + classPath.length,
+                                7,
+                                classPath.length);
         }
         long t1 = System.currentTimeMillis();
         System.out.println("Complete, took "+(t1-t0)+" millis");
@@ -61,23 +64,27 @@ public class ITResolverConcurrencyTest {
         ExecutorService resolverExecutor = Executors.newCachedThreadPool();
         System.out.println("Create 100 threads");
         long t0 = System.currentTimeMillis();
-        List<Future<String[]>> futures = new ArrayList<Future<String[]>>();
+        List<Future<String[]>> futures = new ArrayList<>();
         RemoteRepository repository = new RemoteRepository();
-        repository.setUrl("http://repo1.maven.org/maven2/");
+        repository.setUrl("https://repo1.maven.org/maven2/");
         repository.setId("central");
-        for(int i=0; i<100; i++) {
-            futures.add(resolverExecutor.submit(new Request(r, new RemoteRepository[]{repository})));
+        for (int i = 0; i < 100; i++) {
+            futures.add(resolverExecutor.submit(new Request(r,
+                                                            new RemoteRepository[]{repository})));
         }
-        Assert.assertTrue(futures.size() == 100);
+        Assert.assertEquals(100,
+                            futures.size());
         for(Future<String[]> future : futures) {
             String[] classPath = future.get();
-            Assert.assertTrue("Expected 7 jars, got "+classPath.length, classPath.length==7);
+            Assert.assertEquals("Expected 7 jars, got " + classPath.length,
+                                7,
+                                classPath.length);
         }
         long t1 = System.currentTimeMillis();
         System.out.println("Complete, took "+(t1-t0)+" millis");
     }
 
-    class Request implements Callable<String[]> {
+    static class Request implements Callable<String[]> {
         Resolver resolver;
         RemoteRepository[] repositories;
 
