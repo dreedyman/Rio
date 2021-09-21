@@ -196,6 +196,7 @@ if [ "$start" = "1" ]; then
     # -Djavax.net.ssl.trustStore=`toNative $RIO_HOME/config/ssl/rio.truststore.jks` \
     # -Djavax.net.ssl.keyStorePassword=rioadmin \
     # -Djavax.net.ssl.trustStorePassword=rioadmin \
+    # -Dorg.rioproject.keyStore="$(toNative $RIO_HOME/config/security/rio-cert.ks)" \
 
     serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
 
@@ -213,7 +214,6 @@ if [ "$start" = "1" ]; then
         -Dsun.rmi.transport.dgcFilter=$serialFilter \
         -Dorg.rioproject.service=$service \
         -Djava.rmi.server.useCodebaseOnly=false \
-        -Dorg.rioproject.keyStore="$(toNative $RIO_HOME/config/security/rio-cert.ks)" \
         -Drio.home="$(toNative $RIO_HOME)" \
         -Drio.log.dir="$(toNative $RIO_HOME/logs/)" \
         -Drio.script.mainClass="$launchTarget" \

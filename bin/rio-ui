@@ -35,9 +35,11 @@ fi
 
 # Check for running on OS/X
 opSys=`uname -s`
+
+#-Dorg.rioproject.keyStore=$RIO_HOME/config/security/rio-cert.ks
 if [ $opSys = "Darwin" ] ; then
-    java -Drio.home=$RIO_HOME -Dorg.rioproject.keyStore=$RIO_HOME/config/security/rio-cert.ks -Djava.security.policy=$RIO_HOME/policy/policy.all -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -Xdock:name="Rio" -jar $path_to_jar $*
+    java -Drio.home=$RIO_HOME -Djava.security.policy=$RIO_HOME/policy/policy.all -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -Xdock:name="Rio" -jar $path_to_jar $*
 else
-    java -Drio.home=$RIO_HOME -Dorg.rioproject.keyStore=$RIO_HOME/config/security/rio-cert.ks -Djava.security.policy=$RIO_HOME/policy/policy.all -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -jar $path_to_jar  $*
+    java -Drio.home=$RIO_HOME -Djava.security.policy=$RIO_HOME/policy/policy.all -Djava.rmi.server.useCodebaseOnly=false -Djava.protocol.handler.pkgs=org.rioproject.url -jar $path_to_jar  $*
 fi
 
