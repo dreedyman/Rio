@@ -21,10 +21,10 @@
 import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.config.Component
 import org.rioproject.security.SecureEnv
-import org.rioproject.start.RioServiceDescriptor
-import org.rioproject.util.FileHelper
+import org.rioproject.start.descriptor.RioServiceDescriptor
+import org.rioproject.start.util.ServiceDescriptorUtil
+import org.rioproject.start.util.FileHelper
 import org.rioproject.util.RioHome
-import org.rioproject.util.ServiceDescriptorUtil
 
 @Component('org.rioproject.start')
 class StartServiceBeanExecConfig {

@@ -19,7 +19,7 @@
  */
 
 import org.rioproject.util.RioHome
-import org.rioproject.util.ServiceDescriptorUtil
+import org.rioproject.start.util.ServiceDescriptorUtil
 import org.rioproject.config.Component
 import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.resolver.maven2.Repository

@@ -3,7 +3,7 @@ import org.rioproject.config.Component
 
 import org.rioproject.security.SecureEnv
 import org.rioproject.util.RioHome
-import org.rioproject.util.ServiceDescriptorUtil
+import org.rioproject.start.util.ServiceDescriptorUtil
 import com.sun.jini.start.ServiceDescriptor
 
 @Component('org.rioproject.start')

@@ -23,8 +23,8 @@ import com.sun.jini.start.ServiceDescriptor
 import org.rioproject.config.Component
 import org.rioproject.resolver.maven2.Repository
 import org.rioproject.security.SecureEnv
+import org.rioproject.start.util.ServiceDescriptorUtil
 import org.rioproject.util.RioHome
-import org.rioproject.util.ServiceDescriptorUtil;
 
 @Component('org.rioproject.start')
 class StartMonitorConfig {
