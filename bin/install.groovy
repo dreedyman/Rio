@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-String javaHome=null
-String rioHome=null
+String javaHome = null
+String rioHome = null
 
-if (args.length<2) {
+if (args.length < 2) {
     javaHome = System.getenv("JAVA_HOME")
     rioHome = System.getenv("RIO_HOME")
-} else if(args.length==2) {
+} else if (args.length == 2) {
     javaHome = args[0]
     rioHome = args[1]    
 } else {
@@ -42,16 +42,16 @@ StringBuilder java = new StringBuilder()
 if (javaHome == null || javaHome.length() == 0) {
     System.err.println("The location of Java was not set, assume java is in the path")
     java.append("java")
-	if(System.getProperty("os.name").startsWith("Windows"))
+	if (System.getProperty("os.name").startsWith("Windows"))
         java.append(".exe")
 } else {
     java.append(javaHome)
-    if(!javaHome.endsWith(File.separator))
+    if (!javaHome.endsWith(File.separator))
         java.append(File.separator)
     java.append("bin").append(File.separator).append("java")
-    if(System.getProperty("os.name").startsWith("Windows"))
+    if (System.getProperty("os.name").startsWith("Windows"))
         java.append(".exe")
-    if(!new File(java.toString()).exists()) {
+    if (!new File(java.toString()).exists()) {
         System.err.println("The java executable not found in provided path: "+java)
         System.exit(2)
     }
@@ -63,14 +63,14 @@ if (rioHome == null || rioHome.length() == 0) {
     System.err.println("Setting the location of rio.home to ${rioHome}")
 }
 
-if(!new File(rioHome, "lib").exists()) {
+if (!new File(rioHome, "lib").exists()) {
     System.err.println("Invalid location of Rio: "+rioHome)
     System.exit(2)
 }
 
 static def getJar(File dir, String name) {
     File jar = null
-    for(File file : dir.listFiles()) {
+    for (File file : dir.listFiles()) {
         if (file.name.startsWith(name)) {
             jar = file
             break
@@ -85,7 +85,7 @@ classPath.append(File.pathSeparator)
 classPath.append(getJar(rioLib, "rio-start").path)
 classPath.append(File.pathSeparator)
 File resolverLibs = new File(rioHome, "lib/resolver")
-for(File f: resolverLibs.listFiles()) {
+for (File f: resolverLibs.listFiles()) {
     classPath.append(File.pathSeparator)
     classPath.append(f.path)
 }
@@ -97,23 +97,23 @@ loggingLibDir.eachFile() { file ->
 classPath.append(File.pathSeparator).append(new File(rioHome, "config/logging/"))
 
 File logDir = new File(rioHome+File.separator+"logs")
-if(!logDir.exists())
+if (!logDir.exists())
     logDir.mkdirs()
 File installerLog = new File(logDir, "install.log")
-if(installerLog.exists()) {
+if (installerLog.exists()) {
     installerLog.delete()
 }
 println "Install Rio artifacts locally..."
 
 StringBuffer out = new StringBuffer()
 long installDate = System.currentTimeMillis()
-String install = "${java.toString()} -Djava.security.policy=${rioHome}/policy/policy.all -Drio.home=$rioHome -classpath ${classPath.toString()} org.rioproject.install.Installer"
+String install = "${java.toString()} -Djava.security.policy=${rioHome}/policy/policy.all -Drio.home=$rioHome -classpath ${classPath.toString()} org.rioproject.start.install.Installer"
 Process process = install.execute()
 process.consumeProcessOutputStream(out)
 process.consumeProcessErrorStream(out)
 process.waitFor()
 
-if(out.length()>0) {
+if (out.length() > 0) {
     StringBuilder builder = new StringBuilder()
     builder.append("===============================================\n")
     builder.append("Installer").append("\n")
