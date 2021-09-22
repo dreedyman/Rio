@@ -19,8 +19,12 @@ dependencyCheck.skip = true
 
 dependencies {
     integrationTestCompile project(':rio-lib')
-    integrationTestCompile project(':rio-test')
-    integrationTestCompile project(':webster')
+    integrationTestCompile (project(':rio-test')) {
+        exclude group: 'org.eclipse.aether'
+        exclude group: 'org.apache.maven'
+        exclude group: "org.apache.maven.wagon"
+    }
+    //integrationTestCompile project(':webster')
     integrationTestCompile project(':cybernode-service')
     integrationTestCompile group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
     integrationTestCompile group: 'junit', name: 'junit', version: "${junitVersion}"
