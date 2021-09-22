@@ -66,8 +66,8 @@ task integrationTest(type: Test) {
     systemProperty "java.rmi.server.useCodebaseOnly", "false"
     systemProperty "logback.configurationFile", "${projectDir.path}/src/int-test/conf/logback.groovy"
     systemProperty "java.util.logging.config.file", "${rioHome}/config/logging/logging.properties"
-    systemProperty "org.rioproject.keystore", "${rioHome}/config/security/rio-cert.ks"
-    systemProperty "rio.log.dir", "/tmp/${System.getProperty("user.name")}/logs"
+    //systemProperty "org.rioproject.keystore", "${rioHome}/config/security/rio-cert.ks"
+    systemProperty "rio.log.dir", "${rioHome}/logs"
 
     mustRunAfter test
 

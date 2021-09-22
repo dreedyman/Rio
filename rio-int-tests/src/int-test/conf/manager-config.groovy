@@ -21,19 +21,19 @@ manager {
     String rioHome = System.getProperty("rio.home")
     StringBuilder classPath = new StringBuilder()
     File rioLib = new File(rioHome+'/lib/')
-    for(File file : rioLib.listFiles()) {
-        if(file.name.startsWith("rio-start")) {
-            if(classPath.length()>0)
+    for (File file : rioLib.listFiles()) {
+        if (file.name.startsWith("rio-start")) {
+            if (classPath.length()>0)
                 classPath.append(File.pathSeparator)
             classPath.append(file.path)
-        } else if(file.name.startsWith("groovy-all")) {
-            if(classPath.length()>0)
+        } else if (file.name.startsWith("groovy-all")) {
+            if (classPath.length()>0)
                 classPath.append(File.pathSeparator)
             classPath.append(file.path)
         }
     }
     File libLogDir = new File(rioLib, "logging")
-    for(File file : libLogDir.listFiles()) {
+    for (File file : libLogDir.listFiles()) {
         if (file.isFile()) {
             classPath.append(File.pathSeparator)
             classPath.append(file.path)
@@ -45,17 +45,14 @@ manager {
 
     inheritOptions = true
 
-    /* Get the directory that the logging FileHandler will create the service log.  */
-    String opSys = System.getProperty('os.name')
-    String rootLogDir = opSys.startsWith("Windows")?System.getProperty("java.io.tmpdir"):'/tmp'
-    String name = System.getProperty('user.name')
-
-    log = "${rootLogDir}${File.separator}${name}${File.separator}logs"
+    log = "${rioHome}${File.separator}logs"
 
     String address = HostUtil.getHostAddressFromProperty("java.rmi.server.hostname");
     System.setProperty("hostAddress", address)
 
     String serialFilter="org.rioproject.**;net.jini.**;com.sun.**"
+
+    //'-Dorg.rioproject.keystore=${rio.home}/config/security/rio-cert.ks '+
 
     jvmOptions =
             '-Djava.protocol.handler.pkgs=org.rioproject.url '+
@@ -72,7 +69,6 @@ manager {
                     '-Djava.util.logging.config.file=${rio.home}/config/logging/logging.properties ' +
                     '-Drio.home=${rio.home} -Drio.test.home=${rio.test.home} -Drio.test.attach '+
                     '-Dorg.rioproject.groups=${org.rioproject.groups} '+
-                    '-Dorg.rioproject.keystore=${rio.home}/config/security/rio-cert.ks '+
                     '-Drio.log.dir=${rio.log.dir} -Dorg.rioproject.service=${service}'
     /*
      * Remove any previously created service log files
