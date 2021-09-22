@@ -81,8 +81,8 @@ task gatherDeps() {
 static boolean filter(artifact) {
     def exclusions = ["rio-int-tests", "distribution"]
     boolean include = true
-    for(String exclude : exclusions) {
-        if(artifact.contains(exclude))  {
+    for (String exclude : exclusions) {
+        if (artifact.contains(exclude))  {
             include = false
             break
         }
@@ -107,6 +107,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
                                     ":rio-cli:install",
                                     ":rio-ui:install",
                                     //":rio-test:install",
+                                    ":jetty:install",
                                     ":watch-ui:install",
                                     gatherDeps]) {
     description 'Creates a Rio distribution'
@@ -118,7 +119,7 @@ task createDistribution(dependsOn: [":rio-platform:install",
 
         rootProject.subprojects.each { project ->
             boolean include = filter(project.path)
-            if(include) {
+            if (include) {
                 //println "Processing ${project.path}"
                 project.tasks.withType(Jar).each { jar ->
                     File target
@@ -199,6 +200,15 @@ artifacts {
 }
 
 publishing {
+    repositories {
+        maven {
+            url = uri("https://repo.repsy.io/mvn/dreedy/maven")
+            credentials {
+                username = project.findProperty("repsy.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("repsy.key") ?: System.getenv("TOKEN")
+            }
+        }
+    }
     publications {
         distribution(MavenPublication) {
             artifact rioDistribution
