@@ -60,6 +60,7 @@ import org.rioproject.util.PropertyHelper
 
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
+
 /**
  * Simplifies the running of core Rio services
  *
@@ -322,7 +323,8 @@ class TestManager {
 
         WebsterService webster
         if (testConfig.useHttps()) {
-            //SecureEnv.setup("${rioHome}/config/security/rio-cert.ks")
+            SecureEnv.setup("${rioHome}/config/security/rio-cert.ks")
+
             webster = new Jetty().setRoots(roots.split(";") as String[])
             webster.startSecure()
         } else {
