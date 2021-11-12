@@ -30,8 +30,7 @@ resolver {
     jar = "${rioHome()}/lib/resolver/resolver-aether-${RioVersion.VERSION}.jar"
 
     repositories {
-        remote = ["bintray": "https://dl.bintray.com/dreedyman/maven",
-                  "rio"    : "https://repo.repsy.io/mvn/dreedy/maven",
+        remote = ["rio"    : "https://repo.repsy.io/mvn/dreedy/maven",
                   "central": "https://repo1.maven.org/maven2"]
 
         flatDirs = [new File(rioHome(), "lib-dl"),
