@@ -31,7 +31,7 @@ Until getting synched with jcenter(), add the following repository declaration i
 
 ```
 repositories {
-   maven { url "https://dl.bintray.com/dreedyman/Rio" }
+   maven { url "https://repo.repsy.io/mvn/dreedy/maven" }
 }
 ```
 You can then declare a dependency on the distribution artifact: ` org.rioproject:distribution:${rioVersion}@zip`
